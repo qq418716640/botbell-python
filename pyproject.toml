@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "botbell"
+dynamic = ["version"]
+description = "Official Python SDK for BotBell — push notifications for AI agents and scripts"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    { name = "BotBell", email = "support@botbell.app" },
+]
+keywords = ["botbell", "push-notification", "ai-agent", "webhook", "mcp"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://botbell.app"
+Documentation = "https://botbell.app/docs"
+Repository = "https://github.com/qq418716640/botbell-python"
+Issues = "https://github.com/qq418716640/botbell-python/issues"
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "ruff>=0.4"]
+
+[tool.setuptools.dynamic]
+version = {attr = "botbell._version.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["botbell*"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

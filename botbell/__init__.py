@@ -14,6 +14,7 @@ from botbell.exceptions import (
     ValidationError,
 )
 from botbell.models import Action, Bot, Quota, Reply, SendResult
+from botbell.webhook import WebhookVerificationError, verify_webhook
 
 __all__ = [
     "__version__",
@@ -32,4 +33,6 @@ __all__ = [
     "BotPausedError",
     "ServerError",
     "ValidationError",
+    "verify_webhook",
+    "WebhookVerificationError",
 ]

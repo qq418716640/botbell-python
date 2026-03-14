@@ -59,16 +59,10 @@ class Quota:
     """User's message quota information."""
 
     plan: str
-    monthly_limit: int | None = None
-    monthly_used: int = 0
-    bot_limit: int = 3
-    bot_used: int = 0
-
-    @property
-    def messages_remaining(self) -> int | None:
-        if self.monthly_limit is None:
-            return None  # unlimited
-        return max(0, self.monthly_limit - self.monthly_used)
+    monthly_limit: int = 0
+    used: int = 0
+    remaining: int = 0
+    reset_at: int = 0
 
 
 @dataclass

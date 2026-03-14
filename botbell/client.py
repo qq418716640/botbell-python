@@ -333,10 +333,10 @@ class BotBell:
         data = resp["data"]
         return Quota(
             plan=data.get("plan", "free"),
-            monthly_limit=data.get("monthly_limit"),
-            monthly_used=data.get("monthly_used", 0),
-            bot_limit=data.get("bot_limit", 3),
-            bot_used=data.get("bot_used", 0),
+            monthly_limit=data.get("monthly_limit", 0),
+            used=data.get("used", 0),
+            remaining=data.get("remaining", 0),
+            reset_at=data.get("reset_at", 0),
         )
 
     # ── Internal ──────────────────────────────────────────────────────

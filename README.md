@@ -102,7 +102,7 @@ client.send("Hello!", bot_id=new_bot.bot_id)
 
 # Check quota
 quota = client.get_quota()
-print(f"{quota.plan}: {quota.messages_remaining} messages left")
+print(f"{quota.plan}: {quota.remaining}/{quota.monthly_limit} messages left")
 ```
 
 ## Webhook Signature Verification

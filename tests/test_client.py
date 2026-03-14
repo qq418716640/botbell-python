@@ -369,9 +369,9 @@ class TestBotManagement:
                 "data": {
                     "plan": "free",
                     "monthly_limit": 300,
-                    "monthly_used": 42,
-                    "bot_limit": 3,
-                    "bot_used": 1,
+                    "used": 42,
+                    "remaining": 258,
+                    "reset_at": 1700000000,
                 },
             }
         )
@@ -380,8 +380,9 @@ class TestBotManagement:
 
         assert quota.plan == "free"
         assert quota.monthly_limit == 300
-        assert quota.monthly_used == 42
-        assert quota.messages_remaining == 258
+        assert quota.used == 42
+        assert quota.remaining == 258
+        assert quota.reset_at == 1700000000
 
     def test_bot_management_requires_pat(self):
         client = BotBell("bt_test123")
@@ -498,13 +499,13 @@ class TestModels:
         assert d["type"] == "input"
         assert d["placeholder"] == "Type here"
 
-    def test_quota_remaining_unlimited(self):
-        q = Quota(plan="pro", monthly_limit=None, monthly_used=0)
-        assert q.messages_remaining is None
-
-    def test_quota_remaining_finite(self):
-        q = Quota(plan="free", monthly_limit=300, monthly_used=299)
-        assert q.messages_remaining == 1
+    def test_quota_fields(self):
+        q = Quota(plan="free", monthly_limit=300, used=42, remaining=258, reset_at=1700000000)
+        assert q.plan == "free"
+        assert q.monthly_limit == 300
+        assert q.used == 42
+        assert q.remaining == 258
+        assert q.reset_at == 1700000000
 
     def test_bot_is_active(self):
         from botbell.models import Bot

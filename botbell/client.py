@@ -227,6 +227,90 @@ class BotBell:
         resp = self._request("POST", "/bots", body={"name": name})
         return self._parse_bot(resp["data"])
 
+    def get_bot(self, bot_id: str) -> Bot:
+        """Get bot details. PAT mode only.
+
+        Args:
+            bot_id: Bot identifier.
+
+        Returns:
+            Bot details (token is masked as hint).
+        """
+        self._require_pat("get_bot")
+        resp = self._request("GET", f"/bots/{bot_id}")
+        return self._parse_bot(resp["data"])
+
+    def update_bot(
+        self,
+        bot_id: str,
+        *,
+        name: str | None = None,
+        description: str | None = None,
+        reply_url: str | None = None,
+        status: str | None = None,
+    ) -> Bot:
+        """Update a bot. PAT mode only.
+
+        Args:
+            bot_id: Bot identifier.
+            name: New display name.
+            description: New description.
+            reply_url: New webhook URL for replies.
+            status: "active" or "paused".
+
+        Returns:
+            Updated Bot details.
+        """
+        self._require_pat("update_bot")
+        body: dict[str, Any] = {}
+        if name is not None:
+            body["name"] = name
+        if description is not None:
+            body["description"] = description
+        if reply_url is not None:
+            body["reply_url"] = reply_url
+        if status is not None:
+            body["status"] = status
+        resp = self._request("PATCH", f"/bots/{bot_id}", body=body)
+        return self._parse_bot(resp["data"])
+
+    def delete_bot(self, bot_id: str) -> None:
+        """Delete a bot. PAT mode only.
+
+        Args:
+            bot_id: Bot identifier.
+        """
+        self._require_pat("delete_bot")
+        self._request("DELETE", f"/bots/{bot_id}")
+
+    def reset_bot_token(self, bot_id: str) -> str:
+        """Reset a bot's API token. PAT mode only.
+
+        The old token is invalidated immediately.
+
+        Args:
+            bot_id: Bot identifier.
+
+        Returns:
+            The new API token string.
+        """
+        self._require_pat("reset_bot_token")
+        resp = self._request("POST", f"/bots/{bot_id}/reset-token")
+        return resp["data"]["api_token"]
+
+    def reset_webhook_secret(self, bot_id: str) -> str:
+        """Reset a bot's webhook secret. PAT mode only.
+
+        Args:
+            bot_id: Bot identifier.
+
+        Returns:
+            The new webhook secret string.
+        """
+        self._require_pat("reset_webhook_secret")
+        resp = self._request("POST", f"/bots/{bot_id}/reset-webhook-secret")
+        return resp["data"]["webhook_secret"]
+
     def get_quota(self) -> Quota:
         """Get current message quota. PAT mode only."""
         self._require_pat("get_quota")
@@ -330,7 +414,8 @@ class BotBell:
         return Bot(
             bot_id=data.get("bot_id", ""),
             name=data.get("name", ""),
-            token=data.get("token"),
+            description=data.get("description"),
+            token=data.get("token") or data.get("api_token"),
             push_url=data.get("push_url"),
             reply_url=data.get("reply_url"),
             status=data.get("status"),

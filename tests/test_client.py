@@ -340,12 +340,19 @@ class TestBotManagement:
     @patch("botbell.client.urllib.request.urlopen")
     def test_reset_bot_token(self, mock_urlopen):
         mock_urlopen.return_value = _mock_response(
-            {"code": 0, "data": {"api_token": "bt_new_rotated"}}
+            {
+                "code": 0,
+                "data": {
+                    "api_token": "bt_new_rotated",
+                    "push_url": "https://api.botbell.app/v1/push/bt_new_rotated",
+                },
+            }
         )
         client = BotBell(pat="pak_test123")
-        new_token = client.reset_bot_token("bot_1")
+        result = client.reset_bot_token("bot_1")
 
-        assert new_token == "bt_new_rotated"
+        assert result["api_token"] == "bt_new_rotated"
+        assert "push_url" in result
         req = mock_urlopen.call_args[0][0]
         assert "/bots/bot_1/reset-token" in req.full_url
 

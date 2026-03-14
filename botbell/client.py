@@ -131,12 +131,11 @@ class BotBell:
             resp = self._request("POST", path, body=body)
 
         data = resp["data"]
-        resolved_bot_id = bot_id or data.get("bot_id")
         return SendResult(
             message_id=data["message_id"],
             delivered=data.get("delivered", True),
             _client=self,
-            _bot_id=resolved_bot_id,
+            _bot_id=bot_id,
         )
 
     def send_and_wait(
@@ -298,7 +297,7 @@ class BotBell:
         self._require_pat("delete_bot")
         self._request("DELETE", f"/bots/{bot_id}")
 
-    def reset_bot_token(self, bot_id: str) -> str:
+    def reset_bot_token(self, bot_id: str) -> dict:
         """Reset a bot's API token. PAT mode only.
 
         The old token is invalidated immediately.
@@ -307,11 +306,12 @@ class BotBell:
             bot_id: Bot identifier.
 
         Returns:
-            The new API token string.
+            Dict with ``api_token`` and ``push_url`` keys.
         """
         self._require_pat("reset_bot_token")
         resp = self._request("POST", f"/bots/{bot_id}/reset-token")
-        return resp["data"]["api_token"]
+        data = resp["data"]
+        return {"api_token": data["api_token"], "push_url": data.get("push_url", "")}
 
     def reset_webhook_secret(self, bot_id: str) -> str:
         """Reset a bot's webhook secret. PAT mode only.

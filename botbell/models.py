@@ -44,6 +44,7 @@ class Bot:
     name: str
     description: str | None = None
     token: str | None = field(default=None, repr=False)
+    webhook_secret: str | None = field(default=None, repr=False)
     push_url: str | None = None
     reply_url: str | None = None
     status: str | None = None

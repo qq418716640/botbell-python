@@ -209,22 +209,34 @@ class BotBell:
         """List all bots. PAT mode only."""
         self._require_pat("list_bots")
         resp = self._request("GET", "/bots")
-        bots = []
-        for item in resp.get("data", []):
-            bots.append(self._parse_bot(item))
-        return bots
+        data = resp.get("data", {})
+        bots_list = data.get("bots", []) if isinstance(data, dict) else data
+        return [self._parse_bot(item) for item in bots_list]
 
-    def create_bot(self, name: str) -> Bot:
+    def create_bot(
+        self,
+        name: str,
+        *,
+        description: str | None = None,
+        reply_url: str | None = None,
+    ) -> Bot:
         """Create a new bot. PAT mode only.
 
         Args:
-            name: Bot display name.
+            name: Bot display name (max 50 chars).
+            description: Bot description (max 200 chars).
+            reply_url: Webhook URL for user replies (max 512 chars).
 
         Returns:
-            The created Bot (includes token and push_url).
+            The created Bot (includes token, push_url, and webhook_secret).
         """
         self._require_pat("create_bot")
-        resp = self._request("POST", "/bots", body={"name": name})
+        body: dict[str, Any] = {"name": name}
+        if description is not None:
+            body["description"] = description
+        if reply_url is not None:
+            body["reply_url"] = reply_url
+        resp = self._request("POST", "/bots", body=body)
         return self._parse_bot(resp["data"])
 
     def get_bot(self, bot_id: str) -> Bot:
@@ -416,6 +428,7 @@ class BotBell:
             name=data.get("name", ""),
             description=data.get("description"),
             token=data.get("token") or data.get("api_token"),
+            webhook_secret=data.get("webhook_secret"),
             push_url=data.get("push_url"),
             reply_url=data.get("reply_url"),
             status=data.get("status"),

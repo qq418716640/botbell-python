@@ -230,14 +230,19 @@ class TestBotManagement:
         mock_urlopen.return_value = _mock_response(
             {
                 "code": 0,
-                "data": [
-                    {
-                        "bot_id": "bot_1",
-                        "name": "Test Bot",
-                        "status": "active",
-                        "created_at": 1700000000,
-                    }
-                ],
+                "data": {
+                    "bots": [
+                        {
+                            "bot_id": "bot_1",
+                            "name": "Test Bot",
+                            "description": "A test bot",
+                            "status": "active",
+                            "created_at": 1700000000,
+                        }
+                    ],
+                    "total": 1,
+                    "limit": 50,
+                },
             }
         )
         client = BotBell(pat="pak_test123")
@@ -246,6 +251,7 @@ class TestBotManagement:
         assert len(bots) == 1
         assert bots[0].bot_id == "bot_1"
         assert bots[0].name == "Test Bot"
+        assert bots[0].description == "A test bot"
         assert bots[0].is_active
 
     @patch("botbell.client.urllib.request.urlopen")
@@ -256,8 +262,9 @@ class TestBotManagement:
                 "data": {
                     "bot_id": "bot_new",
                     "name": "My Bot",
-                    "token": "bt_new123",
+                    "api_token": "bt_new123",
                     "push_url": "https://api.botbell.app/v1/push/bt_new123",
+                    "webhook_secret": "whsec_abc123",
                 },
             }
         )
@@ -266,7 +273,87 @@ class TestBotManagement:
 
         assert bot.bot_id == "bot_new"
         assert bot.token == "bt_new123"
+        assert bot.webhook_secret == "whsec_abc123"
         assert bot.push_url is not None
+
+    @patch("botbell.client.urllib.request.urlopen")
+    def test_create_bot_with_options(self, mock_urlopen):
+        mock_urlopen.return_value = _mock_response(
+            {"code": 0, "data": {"bot_id": "bot_new", "name": "My Bot"}}
+        )
+        client = BotBell(pat="pak_test123")
+        client.create_bot("My Bot", description="Desc", reply_url="https://example.com/hook")
+
+        body = json.loads(mock_urlopen.call_args[0][0].data)
+        assert body["name"] == "My Bot"
+        assert body["description"] == "Desc"
+        assert body["reply_url"] == "https://example.com/hook"
+
+    @patch("botbell.client.urllib.request.urlopen")
+    def test_get_bot(self, mock_urlopen):
+        mock_urlopen.return_value = _mock_response(
+            {
+                "code": 0,
+                "data": {
+                    "bot_id": "bot_1",
+                    "name": "Test Bot",
+                    "api_token_hint": "bt_xxxx...xxxx",
+                    "status": "active",
+                },
+            }
+        )
+        client = BotBell(pat="pak_test123")
+        bot = client.get_bot("bot_1")
+        assert bot.bot_id == "bot_1"
+        assert bot.name == "Test Bot"
+
+    @patch("botbell.client.urllib.request.urlopen")
+    def test_update_bot(self, mock_urlopen):
+        mock_urlopen.return_value = _mock_response(
+            {"code": 0, "data": {"bot_id": "bot_1", "name": "New Name", "status": "paused"}}
+        )
+        client = BotBell(pat="pak_test123")
+        bot = client.update_bot("bot_1", name="New Name", status="paused")
+
+        assert bot.name == "New Name"
+        assert not bot.is_active
+        body = json.loads(mock_urlopen.call_args[0][0].data)
+        assert body["name"] == "New Name"
+        assert body["status"] == "paused"
+
+    @patch("botbell.client.urllib.request.urlopen")
+    def test_delete_bot(self, mock_urlopen):
+        mock_urlopen.return_value = _mock_response({"code": 0, "message": "success"})
+        client = BotBell(pat="pak_test123")
+        client.delete_bot("bot_1")
+
+        req = mock_urlopen.call_args[0][0]
+        assert req.method == "DELETE"
+        assert "/bots/bot_1" in req.full_url
+
+    @patch("botbell.client.urllib.request.urlopen")
+    def test_reset_bot_token(self, mock_urlopen):
+        mock_urlopen.return_value = _mock_response(
+            {"code": 0, "data": {"api_token": "bt_new_rotated"}}
+        )
+        client = BotBell(pat="pak_test123")
+        new_token = client.reset_bot_token("bot_1")
+
+        assert new_token == "bt_new_rotated"
+        req = mock_urlopen.call_args[0][0]
+        assert "/bots/bot_1/reset-token" in req.full_url
+
+    @patch("botbell.client.urllib.request.urlopen")
+    def test_reset_webhook_secret(self, mock_urlopen):
+        mock_urlopen.return_value = _mock_response(
+            {"code": 0, "data": {"webhook_secret": "whsec_new_rotated"}}
+        )
+        client = BotBell(pat="pak_test123")
+        new_secret = client.reset_webhook_secret("bot_1")
+
+        assert new_secret == "whsec_new_rotated"
+        req = mock_urlopen.call_args[0][0]
+        assert "/bots/bot_1/reset-webhook-secret" in req.full_url
 
     @patch("botbell.client.urllib.request.urlopen")
     def test_get_quota(self, mock_urlopen):

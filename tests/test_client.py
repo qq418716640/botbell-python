@@ -174,16 +174,18 @@ class TestGetReplies:
         mock_urlopen.return_value = _mock_response(
             {
                 "code": 0,
-                "data": [
-                    {
-                        "reply_id": "r_1",
-                        "bot_id": "bot_1",
-                        "message": "Yes",
-                        "timestamp": 1700000000,
-                        "action": "approve",
-                        "reply_to": "msg_1",
-                    }
-                ],
+                "data": {
+                    "messages": [
+                        {
+                            "message_id": "r_1",
+                            "content": "Yes",
+                            "timestamp": 1700000000,
+                            "action": "approve",
+                            "reply_to": "msg_1",
+                        }
+                    ],
+                    "has_more": False,
+                },
             }
         )
         client = BotBell("bt_test123")
@@ -201,7 +203,9 @@ class TestGetReplies:
 
     @patch("botbell.client.urllib.request.urlopen")
     def test_get_replies_pat(self, mock_urlopen):
-        mock_urlopen.return_value = _mock_response({"code": 0, "data": []})
+        mock_urlopen.return_value = _mock_response(
+            {"code": 0, "data": {"messages": [], "has_more": False}}
+        )
         client = BotBell(pat="pak_test123")
         replies = client.get_replies(bot_id="bot_1")
 
@@ -216,7 +220,9 @@ class TestGetReplies:
 
     @patch("botbell.client.urllib.request.urlopen")
     def test_get_replies_empty(self, mock_urlopen):
-        mock_urlopen.return_value = _mock_response({"code": 0, "data": []})
+        mock_urlopen.return_value = _mock_response(
+            {"code": 0, "data": {"messages": [], "has_more": False}}
+        )
         client = BotBell("bt_test123")
         assert client.get_replies() == []
 
@@ -524,15 +530,17 @@ class TestSendAndWait:
             _mock_response(
                 {
                     "code": 0,
-                    "data": [
-                        {
-                            "reply_id": "r_1",
-                            "bot_id": "bot_1",
-                            "message": "Yes",
-                            "action": "approve",
-                            "reply_to": "msg_1",
-                        }
-                    ],
+                    "data": {
+                        "messages": [
+                            {
+                                "message_id": "r_1",
+                                "content": "Yes",
+                                "action": "approve",
+                                "reply_to": "msg_1",
+                            }
+                        ],
+                        "has_more": False,
+                    },
                 }
             ),
         ]
@@ -556,30 +564,32 @@ class TestSendAndWait:
             _mock_response(
                 {
                     "code": 0,
-                    "data": [
-                        {
-                            "reply_id": "r_before",
-                            "bot_id": "bot_1",
-                            "message": "Before",
-                            "reply_to": "msg_other",
-                        },
-                        {
-                            "reply_id": "r_1",
-                            "bot_id": "bot_1",
-                            "message": "Yes",
-                            "reply_to": "msg_1",
-                        },
-                        {
-                            "reply_id": "r_after",
-                            "bot_id": "bot_1",
-                            "message": "After",
-                            "reply_to": "msg_another",
-                        },
-                    ],
+                    "data": {
+                        "messages": [
+                            {
+                                "message_id": "r_before",
+                                "content": "Before",
+                                "reply_to": "msg_other",
+                            },
+                            {
+                                "message_id": "r_1",
+                                "content": "Yes",
+                                "reply_to": "msg_1",
+                            },
+                            {
+                                "message_id": "r_after",
+                                "content": "After",
+                                "reply_to": "msg_another",
+                            },
+                        ],
+                        "has_more": False,
+                    },
                 }
             ),
             # subsequent get_replies call
-            _mock_response({"code": 0, "data": []}),
+            _mock_response(
+                {"code": 0, "data": {"messages": [], "has_more": False}}
+            ),
         ]
         client = BotBell("bt_test123")
         reply = client.send_and_wait("Approve?", timeout=10)
@@ -601,7 +611,9 @@ class TestSendAndWait:
             _mock_response(
                 {"code": 0, "data": {"message_id": "msg_1", "bot_id": "bot_1"}}
             ),
-            _mock_response({"code": 0, "data": []}),
+            _mock_response(
+                {"code": 0, "data": {"messages": [], "has_more": False}}
+            ),
         ]
         client = BotBell("bt_test123")
         # Use very short timeout so it exits after one poll cycle

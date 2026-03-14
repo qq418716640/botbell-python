@@ -191,16 +191,18 @@ class BotBell:
             path = f"/bots/{bot_id}/replies"
             resp = self._request("GET", path)
 
+        data = resp.get("data", {})
+        messages = data.get("messages", []) if isinstance(data, dict) else data
         return [
             Reply(
-                reply_id=item.get("reply_id", ""),
+                reply_id=item.get("message_id", ""),
                 bot_id=item.get("bot_id", ""),
-                message=item.get("message", ""),
+                message=item.get("content", ""),
                 timestamp=item.get("timestamp", 0),
                 action=item.get("action"),
                 reply_to=item.get("reply_to"),
             )
-            for item in resp.get("data", [])
+            for item in messages
         ]
 
     # ── Bot management (PAT mode only) ────────────────────────────────

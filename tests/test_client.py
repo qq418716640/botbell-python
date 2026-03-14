@@ -384,6 +384,16 @@ class TestBotManagement:
         with pytest.raises(BotBellError, match="requires PAT mode"):
             client.create_bot("test")
         with pytest.raises(BotBellError, match="requires PAT mode"):
+            client.get_bot("bot_1")
+        with pytest.raises(BotBellError, match="requires PAT mode"):
+            client.update_bot("bot_1", name="x")
+        with pytest.raises(BotBellError, match="requires PAT mode"):
+            client.delete_bot("bot_1")
+        with pytest.raises(BotBellError, match="requires PAT mode"):
+            client.reset_bot_token("bot_1")
+        with pytest.raises(BotBellError, match="requires PAT mode"):
+            client.reset_webhook_secret("bot_1")
+        with pytest.raises(BotBellError, match="requires PAT mode"):
             client.get_quota()
 
 

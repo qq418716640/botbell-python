@@ -148,7 +148,17 @@ The verification checks HMAC-SHA256 signature and rejects requests older than 5 
 
 ### `list_bots() → list[Bot]` (PAT only)
 
-### `create_bot(name) → Bot` (PAT only)
+### `create_bot(name, *, description=None, reply_url=None) → Bot` (PAT only)
+
+### `get_bot(bot_id) → Bot` (PAT only)
+
+### `update_bot(bot_id, *, name=None, description=None, reply_url=None, status=None) → Bot` (PAT only)
+
+### `delete_bot(bot_id)` (PAT only)
+
+### `reset_bot_token(bot_id) → str` (PAT only)
+
+### `reset_webhook_secret(bot_id) → str` (PAT only)
 
 ### `get_quota() → Quota` (PAT only)
 

@@ -29,7 +29,6 @@ class Reply:
     """A user reply to a message."""
 
     reply_id: str
-    bot_id: str
     message: str
     timestamp: int = 0
     action: str | None = None
@@ -77,6 +76,7 @@ class SendResult:
     """Result of sending a message."""
 
     message_id: str
+    delivered: bool = True
     _client: Any = field(repr=False, default=None)
     _bot_id: str | None = field(repr=False, default=None)
 

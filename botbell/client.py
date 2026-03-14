@@ -130,9 +130,11 @@ class BotBell:
             path = f"/bots/{bot_id}/push"
             resp = self._request("POST", path, body=body)
 
-        resolved_bot_id = bot_id or resp.get("data", {}).get("bot_id")
+        data = resp["data"]
+        resolved_bot_id = bot_id or data.get("bot_id")
         return SendResult(
-            message_id=resp["data"]["message_id"],
+            message_id=data["message_id"],
+            delivered=data.get("delivered", True),
             _client=self,
             _bot_id=resolved_bot_id,
         )
@@ -196,7 +198,6 @@ class BotBell:
         return [
             Reply(
                 reply_id=item.get("message_id", ""),
-                bot_id=item.get("bot_id", ""),
                 message=item.get("content", ""),
                 timestamp=item.get("timestamp", 0),
                 action=item.get("action"),

@@ -105,6 +105,30 @@ quota = client.get_quota()
 print(f"{quota.plan}: {quota.messages_remaining} messages left")
 ```
 
+## Webhook Signature Verification
+
+When using `reply_url` (webhook), verify incoming requests to ensure they're from BotBell:
+
+```python
+from botbell import verify_webhook, WebhookVerificationError
+
+# In your webhook handler (Flask/FastAPI/Django etc.)
+try:
+    verify_webhook(
+        body=request.body,
+        signature_header=request.headers["X-Webhook-Signature"],
+        timestamp_header=request.headers["X-Webhook-Timestamp"],
+        secret="your_webhook_secret",
+    )
+except WebhookVerificationError as e:
+    return {"error": str(e)}, 401
+
+# Signature valid — process the reply
+data = json.loads(request.body)
+```
+
+The verification checks HMAC-SHA256 signature and rejects requests older than 5 minutes (configurable via `tolerance` parameter).
+
 ## API Reference
 
 ### `BotBell(token=None, *, pat=None, base_url=..., timeout=30)`
@@ -127,6 +151,10 @@ print(f"{quota.plan}: {quota.messages_remaining} messages left")
 ### `create_bot(name) → Bot` (PAT only)
 
 ### `get_quota() → Quota` (PAT only)
+
+### `verify_webhook(body, signature_header, timestamp_header, secret, *, tolerance=300)`
+
+Verifies webhook signature. Raises `WebhookVerificationError` on failure.
 
 ## Errors
 

@@ -2,6 +2,11 @@
 
 # BotBell Python SDK
 
+[![PyPI](https://img.shields.io/pypi/v/botbell)](https://pypi.org/project/botbell/)
+[![Python](https://img.shields.io/pypi/pyversions/botbell)](https://pypi.org/project/botbell/)
+[![License](https://img.shields.io/github/license/qq418716640/botbell-python)](https://github.com/qq418716640/botbell-python/blob/main/LICENSE)
+[![CI](https://github.com/qq418716640/botbell-python/actions/workflows/ci.yml/badge.svg)](https://github.com/qq418716640/botbell-python/actions/workflows/ci.yml)
+
 Official Python SDK for [BotBell](https://botbell.app) — push notifications for AI agents and scripts.
 
 **Zero dependencies.** Uses only Python standard library.
